@@ -3,6 +3,7 @@ class RestroomsController < ApplicationController
 
   before_filter :list_restrooms, only: [:index]
   before_filter :find_restroom, only: [:show, :update, :edit, :destroy, :upvote, :downvote]
+  before_filter :rollback_unless_admin_user, only: :update
 
   def index
     if params[:nearby]
@@ -64,6 +65,14 @@ private
       flash[:notice] = I18n.t("restroom.flash.#{action.to_s}error")
     end
     redirect_to :back
+  end
+
+  def rollback_unless_admin_user
+    return if admin_user_signed_in?
+    version = @restroom.versions.count
+    if version > 1
+      # @restroom.reify
+    end
   end
 
   def list_restrooms
